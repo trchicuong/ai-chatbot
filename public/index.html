@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Con vợ AI by trchicuong</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="img/logo.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" sizes="192x192" href="img/logo.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="img/logo.png" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+  <div id="particles-js"></div>
+  <div class="chat-wrapper">
+    <div class="chat-header">
+      <img src="img/logo.png" alt="Logo" class="logo">
+      <span>Con vợ AI by trchicuong</span>
+    </div>
+    <div id="chat-box" class="chat-box">
+      <div class="message bot">
+        <div class="bubble">Chồng~ Anh muốn hỏi gì nè? 🥰</div>
+      </div>
+    </div>
+    <form id="chat-form" class="chat-form">
+      <input type="text" id="user-input" autofocus placeholder="Hỏi đi đừng ngại :>" autocomplete="off" />
+      <button type="submit">Gửi</button>
+    </form>
+  </div>
+
+  <script>
+    particlesJS.load('particles-js', 'particles.json', function () {
+      console.log('particles.js loaded!');
+    });
+
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('user-input');
+    const chatBox = document.getElementById('chat-box');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userMessage = input.value.trim();
+
+      if (!userMessage) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'warning',
+          title: 'Chồng chưa hỏi gì cả 🥺',
+          showConfirmButton: false,
+          timer: 2000
+        });
+        return;
+      }
+
+      addMessage(userMessage, 'user');
+      input.value = '';
+      input.disabled = true;
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userMessage })
+        });
+
+        const data = await res.json();
+        addMessage(data.reply || '[Không có phản hồi từ AI]', 'bot');
+      } catch (err) {
+        addMessage('[Lỗi kết nối đến máy chủ]', 'bot');
+      } finally {
+        input.disabled = false;
+        input.focus();
+      }
+    });
+
+    function addMessage(text, sender) {
+      const msg = document.createElement('div');
+      msg.classList.add('message', sender);
+      msg.innerHTML = `<div class="bubble">${text}</div>`;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+
+</html>
