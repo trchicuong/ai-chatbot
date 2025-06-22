@@ -1,6 +1,7 @@
 # 🤖 AI CHATBOT - Chatbot by trchicuong
 
-Chatbot AI đơn giản viết bằng JavaScript kết nối API AI (OpenRouter).
+Chatbot AI đơn giản viết bằng JavaScript kết nối API AI (OpenRouter). <br>
+> *Demo mục đích chỉ là bản xem trước giao diện tổng thể của web, không dùng được AI!*
 
 ---
 
