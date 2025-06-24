@@ -2,7 +2,8 @@
   box-sizing: border-box;
 }
 
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -53,14 +54,33 @@ body, html {
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 .chat-box {
   flex: 1;
   padding: 16px;
-  overflow-y: auto;
   background: transparent;
+  max-height: 100%;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.chat-box::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 4px;
+}
+
+.chat-box::-webkit-scrollbar-thumb:hover {
+  background-color: #777;
 }
 
 .message {
@@ -76,12 +96,105 @@ body, html {
   justify-content: flex-start;
 }
 
+.typing span {
+  animation: blink 1s infinite;
+  opacity: 0;
+}
+
+.typing span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
 .bubble {
-  max-width: 75%;
+  max-width: 100%;
   padding: 12px 16px;
   border-radius: 20px;
   font-size: 15px;
   line-height: 1.4;
+  white-space: normal;
+}
+
+.bubble h1, h2, h3, h4, h5, h6 {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.bubble .code-block {
+  background-color: #000000;
+  color: green;
+  padding: 12px 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 12px;
+  margin-bottom: 0px;
+  white-space: pre;
+}
+
+.bubble code {
+  background-color: #000000;
+  color: green;
+  padding: 2px 6px;
+  white-space: pre;
+  border-radius: 4px;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 14px;
+  overflow-x: auto;
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+code::-webkit-scrollbar,
+.code-block::-webkit-scrollbar {
+  height: 4px;
+}
+
+code::-webkit-scrollbar-track,
+.code-block::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+code::-webkit-scrollbar-thumb,
+.code-block::-webkit-scrollbar-thumb {
+  background: #999;
+  border-radius: 4px;
+}
+
+code::-webkit-scrollbar-thumb:hover,
+.code-block::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+.bubble ul {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.bubble li {
+  margin-bottom: 6px;
 }
 
 .message.user .bubble {

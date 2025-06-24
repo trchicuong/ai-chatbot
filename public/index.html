@@ -60,6 +60,9 @@
       input.value = '';
       input.disabled = true;
 
+      const thinkingId = 'thinking-' + Date.now();
+      addThinkingMessage(thinkingId);
+
       try {
         const res = await fetch('/api/chat', {
           method: 'POST',
@@ -68,9 +71,9 @@
         });
 
         const data = await res.json();
-        addMessage(data.reply || '[Không có phản hồi từ AI]', 'bot');
+        updateThinkingMessage(thinkingId, data.reply || '[Không có phản hồi từ AI]');
       } catch (err) {
-        addMessage('[Lỗi kết nối đến máy chủ]', 'bot');
+        updateThinkingMessage(thinkingId, '[Lỗi kết nối đến máy chủ]');
       } finally {
         input.disabled = false;
         input.focus();
@@ -82,6 +85,93 @@
       msg.classList.add('message', sender);
       msg.innerHTML = `<div class="bubble">${text}</div>`;
       chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addThinkingMessage(id) {
+      const msg = document.createElement('div');
+      msg.classList.add('message', 'bot');
+      msg.id = id;
+      msg.innerHTML = `<div class="bubble typing">Con vợ đang suy nghĩ<span>.</span><span>.</span><span>.</span></div>`;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function updateThinkingMessage(id, newText) {
+      const msg = document.getElementById(id);
+      if (!msg) return;
+
+      newText = newText
+        .replace(/\r\n/g, '\n')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n[ \t]*\n+/g, '\n\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+
+      const codeBlocks = [];
+      newText = newText.replace(/```([\s\S]*?)```/g, (_, code) => {
+        const placeholder = `__CODEBLOCK_${codeBlocks.length}__`;
+        codeBlocks.push(`<div class="code-block">${code.trim()}</div>`);
+        return placeholder;
+      });
+
+      let parsedText = newText
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+
+        .replace(/```([\s\S]*?)```/g, (match, code) => {
+          return `<div class="code-block">${code.trim()}</div>`;
+        })
+
+        .replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; border-radius: 8px;" />')
+
+        .replace(/`([^`]+?)`/g, '<code>$1</code>')
+
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+
+        .replace(/^######\s+(.+)$/gm, '<h6>$1</h6>')
+        .replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>')
+        .replace(/^####\s+(.+)$/gm, '<h4>$1</h4>')
+        .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+        .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
+        .replace(/^#\s+(.+)$/gm, '<h1>$1</h1>')
+
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, text, url) => {
+          return text === url
+            ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
+            : `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        })
+
+        .replace(/^\s*[\*\-]\s+(.+)$/gm, '<li>$1</li>');
+
+      parsedText = parsedText.replace(
+        /(?:\n)?((?:<li>.*?<\/li>\n?)+)/gs,
+        match => `<ul>${match.replace(/\n/g, '')}</ul>`
+      );
+
+      parsedText = parsedText.replace(
+        /<br>\|(.+?)\|<br>(\|[-:| ]+\|<br>)((\|.*\|<br>)+)/gs,
+        (_, headers, separator, rows) => {
+          const ths = headers.split('|').map(c => `<th>${c.trim()}</th>`).join('');
+          const trs = rows.trim().split('<br>').map(row => {
+            const cells = row.split('|').map(c => `<td>${c.trim()}</td>`).join('');
+            return `<tr>${cells}</tr>`;
+          }).join('');
+          return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+        }
+      );
+
+      parsedText = parsedText
+        .replace(/\n/g, '<br>')
+        .replace(/<\/(h[1-6]|ul|ol|li|div|blockquote|table|thead|tbody|tr|th|td|strong)><br>/g, '</$1>');
+
+      codeBlocks.forEach((html, i) => {
+        parsedText = parsedText.replace(`__CODEBLOCK_${i}__`, html);
+      });
+
+      msg.innerHTML = `<div class="bubble">${parsedText}</div>`;
       chatBox.scrollTop = chatBox.scrollHeight;
     }
   </script>
